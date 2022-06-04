@@ -1,0 +1,53 @@
+name: Docker Multi-Architecture Build
+
+on:
+  push:
+    paths-ignore:
+      - "**.md"
+    branches:
+      - main
+
+env:
+  VERSION: v21.2.11
+
+jobs:
+  build-docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone CockroachDB repo
+        uses: actions/checkout@v3
+        with:
+          repository: cockroachdb/cockroach
+          ref: ${{ env.VERSION }}
+          submodules: true
+      - name: Clone current repo
+        uses: actions/checkout@v3
+        with:
+          path: "./docker/"
+      - name: Build arm64 binaries
+        run: |
+          GOFLAGS=-mod=readonly build/builder.sh mkrelease arm64-linux
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1.2.0
+        with:
+          platforms: all
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1.5.0
+        with:
+          version: latest
+      - name: Login to DockerHub
+        uses: docker/login-action@v1.10.0
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Build and push
+        uses: docker/build-push-action@v2.6.1
+        with:
+          context: .
+          file: "./docker/Dockerfile"
+          platforms: linux/arm64
+          push: true
+          tags: 1337kavin/cockroachdb:${{ env.VERSION }},1337kavin/cockroachdb:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode
