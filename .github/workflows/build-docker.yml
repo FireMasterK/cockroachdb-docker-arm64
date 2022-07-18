@@ -14,6 +14,13 @@ jobs:
   build-docker:
     runs-on: ubuntu-latest
     steps:
+      - name: Setup Bazelisk
+        uses: bazelbuild/setup-bazelisk@v2
+      - name: Mount bazel cache
+        uses: actions/cache@v3
+        with:
+          path: "~/.cache/bazel"
+          key: bazel
       - name: Clone CockroachDB repo
         uses: actions/checkout@v3
         with:
@@ -26,7 +33,8 @@ jobs:
           path: "./docker/"
       - name: Build arm64 binaries
         run: |
-          GOFLAGS=-mod=readonly build/builder.sh mkrelease arm64-linux
+          bazel build pkg/cmd/cockroach --config with_ui --config crosslinuxarm && \
+          cp ./_bazel/bin/pkg/cmd/cockroach/cockroach_/cockroach cockroach
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
         with:
@@ -48,6 +56,6 @@ jobs:
           file: "./docker/Dockerfile"
           platforms: linux/arm64
           push: true
-          tags: 1337kavin/cockroachdb:${{ env.VERSION }},1337kavin/cockroachdb:latest
+          tags: 1337kavin/cockroachdb:${{ env.VERSION }},1337kavin/cockroachdb:unstable
           cache-from: type=gha
           cache-to: type=gha,mode=max
