@@ -56,6 +56,6 @@ jobs:
           file: "./docker/Dockerfile"
           platforms: linux/arm64
           push: true
-          tags: 1337kavin/cockroachdb:${{ env.VERSION }},1337kavin/cockroachdb:unstable
+          tags: 1337kavin/cockroachdb:${{ env.VERSION }},1337kavin/cockroachdb:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
