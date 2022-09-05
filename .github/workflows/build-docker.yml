@@ -8,7 +8,7 @@ on:
       - main
 
 env:
-  VERSION: v21.2.15
+  VERSION: v21.1.6
 
 jobs:
   build-docker:
