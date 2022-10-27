@@ -33,7 +33,7 @@ jobs:
           path: "./docker/"
       - name: Build arm64 binaries
         run: |
-          bazel build pkg/cmd/cockroach --config with_ui --config crosslinuxarm && \
+          bazel build pkg/cmd/cockroach --config crosslinuxarm && \
           cp ./_bazel/bin/pkg/cmd/cockroach/cockroach_/cockroach cockroach
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
